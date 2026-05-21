@@ -36,12 +36,12 @@ main{padding:16px 16px calc(env(safe-area-inset-bottom) + 24px);}
 .field:last-child{margin-bottom:0;}
 .field-label{font-size:13px;color:var(--ink2);margin-bottom:6px;display:block;}
 .field-sub{font-size:11px;color:var(--ink3);margin-bottom:6px;display:block;margin-top:-2px;}
-input[type=text],input[type=number]{
+input[type=text]{
   width:100%;background:var(--bg2);border:0.5px solid var(--border);
   border-radius:10px;padding:12px 14px;font-size:16px;color:var(--ink);
   outline:none;-webkit-appearance:none;appearance:none;
 }
-input[type=text]:focus,input[type=number]:focus{border-color:var(--accent);background:var(--card);}
+input[type=text]:focus{border-color:var(--accent);background:var(--card);}
 .input-row{display:flex;align-items:center;gap:8px;}
 .input-row input{flex:1;}
 .input-unit{font-size:15px;color:var(--ink2);white-space:nowrap;}
@@ -53,7 +53,9 @@ input[type=text]:focus,input[type=number]:focus{border-color:var(--accent);backg
   background:var(--bg2);color:var(--ink2);cursor:pointer;
 }
 .qbtn.on{background:var(--ink);color:#f5f2eb;border-color:transparent;}
-.vat-tabs{display:flex;gap:6px;}
+
+/* VAT tabs */
+.vat-tabs{display:flex;gap:6px;margin-bottom:12px;}
 .vbtn{
   flex:1;padding:10px 4px;font-size:13px;font-weight:500;
   border-radius:10px;border:0.5px solid var(--border);
@@ -61,6 +63,25 @@ input[type=text]:focus,input[type=number]:focus{border-color:var(--accent);backg
 }
 .vbtn small{font-size:11px;opacity:.7;display:block;font-weight:400;}
 .vbtn.on{background:var(--ink);color:#f5f2eb;border-color:transparent;}
+
+/* custom VAT slider */
+.vat-custom{background:var(--bg2);border-radius:12px;padding:12px 14px;}
+.vat-custom-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.vat-custom-label{font-size:13px;color:var(--ink2);}
+.vat-custom-val{font-size:20px;font-weight:700;color:var(--ink);}
+
+/* sliders */
+.slider-wrap{display:flex;align-items:center;gap:10px;}
+.slider-wrap input[type=range]{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:4px;background:var(--border);border-radius:2px;outline:none;
+}
+.slider-wrap input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:28px;height:28px;
+  border-radius:50%;background:var(--ink);cursor:pointer;
+}
+.slider-side{font-size:13px;color:var(--ink3);min-width:28px;text-align:center;}
+
 select{
   width:100%;background:var(--bg2);border:0.5px solid var(--border);
   border-radius:10px;padding:12px 14px;font-size:16px;color:var(--ink);
@@ -74,9 +95,6 @@ select{
   justify-content:space-between;align-items:center;
 }
 .shipping-result span:last-child{font-size:15px;font-weight:600;color:var(--ink);}
-.loss-row{display:flex;align-items:center;gap:10px;}
-.loss-row input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--border);border-radius:2px;outline:none;}
-.loss-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--ink);cursor:pointer;}
 .loss-val{font-size:16px;font-weight:600;min-width:44px;text-align:right;}
 .loss-quick{display:flex;gap:6px;margin-top:8px;}
 .lqbtn{
@@ -157,8 +175,13 @@ select{
     <div class="field">
       <label class="field-label">损耗率</label>
       <span class="field-sub">生鲜建议 10–20%，干货 0–5%</span>
-      <div class="loss-row">
-        <input type="range" id="loss" min="0" max="30" step="1" value="0" oninput="document.getElementById('loss-val').textContent=this.value+'%';syncLossQuick();calc()">
+      <div class="slider-wrap">
+        <span class="slider-side">0%</span>
+        <input type="range" id="loss" min="0" max="30" step="1" value="0"
+          oninput="document.getElementById('loss-val').textContent=this.value+'%';syncLossQuick();calc()">
+        <span class="slider-side">30%</span>
+      </div>
+      <div style="text-align:center;margin-top:6px;">
         <span class="loss-val" id="loss-val">0%</span>
       </div>
       <div class="loss-quick">
@@ -187,15 +210,26 @@ select{
         <button class="qbtn" onclick="setMarkup(150)">+150%</button>
       </div>
     </div>
+
     <div class="field">
       <label class="field-label">VAT 税率</label>
       <div class="vat-tabs">
-        <button class="vbtn" onclick="setVat(0,this)">0%<small>无VAT</small></button>
-        <button class="vbtn" onclick="setVat(6,this)">6%<small>基本食品</small></button>
-        <button class="vbtn" onclick="setVat(13,this)">13%<small>餐饮加工</small></button>
-        <button class="vbtn on" onclick="setVat(23,this)">23%<small>一般商品</small></button>
+        <button class="vbtn on" id="vbtn0"  onclick="setVatPreset(0,this)">0%<small>无VAT</small></button>
+        <button class="vbtn"    id="vbtn6"  onclick="setVatPreset(6,this)">6%<small>基本食品</small></button>
+        <button class="vbtn"    id="vbtn13" onclick="setVatPreset(13,this)">13%<small>餐饮加工</small></button>
+        <button class="vbtn"    id="vbtn23" onclick="setVatPreset(23,this)">23%<small>一般商品</small></button>
       </div>
-      <p class="hint-text" id="vat-hint">一般商品、日用品、饮料适用 23% 税率</p>
+      <div class="vat-custom">
+        <div class="vat-custom-top">
+          <span class="vat-custom-label">自定义税率</span>
+          <span class="vat-custom-val" id="vat-display">0%</span>
+        </div>
+        <div class="slider-wrap">
+          <span class="slider-side">0%</span>
+          <input type="range" id="vat-slider" min="0" max="30" step="1" value="0" oninput="onVatSlider(this.value)">
+          <span class="slider-side">30%</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -237,28 +271,32 @@ select{
 
 </main>
 <script>
-let vatRate = 23;
+let vatRate = 0;
 
 function parseNum(str) {
   if (!str) return NaN;
   return parseFloat(str.toString().replace(',', '.'));
 }
-
 function fmtEur(n) {
   return '€' + n.toFixed(2).replace('.', ',');
 }
 
-function setVat(rate, btn) {
+function onVatSlider(v) {
+  vatRate = parseInt(v);
+  document.getElementById('vat-display').textContent = vatRate + '%';
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('on'));
+  const preset = document.getElementById('vbtn' + vatRate);
+  if (preset) preset.classList.add('on');
+  document.getElementById('vat-row').style.display = vatRate === 0 ? 'none' : 'flex';
+  calc();
+}
+
+function setVatPreset(rate, btn) {
   vatRate = rate;
+  document.getElementById('vat-slider').value = rate;
+  document.getElementById('vat-display').textContent = rate + '%';
   document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
-  const hints = {
-    0:  '不含VAT，直接按税前价出售',
-    6:  '米、面、蔬菜、肉类等基本食品适用 6% 税率',
-    13: '部分加工食品、餐饮类适用 13% 税率',
-    23: '一般商品、日用品、饮料适用 23% 税率'
-  };
-  document.getElementById('vat-hint').textContent = hints[rate];
   document.getElementById('vat-row').style.display = rate === 0 ? 'none' : 'flex';
   calc();
 }
@@ -322,7 +360,7 @@ function calc() {
   const qty       = parseNum(document.getElementById('qty').value) || 0;
   const freightPer = (freight > 0 && qty > 0) ? freight / qty : 0;
 
-  const costEx     = costType === 'inc' ? raw / (1 + vat) : raw;
+  const costEx     = costType === 'inc' ? (vat > 0 ? raw / (1 + vat) : raw) : raw;
   const lossAdj    = lossPct > 0 ? costEx * lossPct / (1 - lossPct) : 0;
   const realCost   = costEx + freightPer + lossAdj;
   const sellEx     = realCost * (1 + markupPct / 100);
@@ -354,6 +392,8 @@ function calc() {
   document.getElementById('badge').textContent  = tag;
   document.getElementById('badge').className    = 'badge ' + cls;
 }
+
+document.getElementById('vat-row').style.display = 'none';
 </script>
 </body>
 </html>
